@@ -1,0 +1,1502 @@
+/* ==========================================================
+   DESIGN TOKENS
+   Palette:  --bg-void #060A12 · --bg-panel #0D1420 · --bg-inset #070B13
+             --border #1C2A3F · --blue #4FC3F7 (nominal/data)
+             --amber #FFB74D (caution) · --red #FF5252 (critical)
+             --green #4ADE80 (go/connected) · --text #E8F1FF · --dim #7C8FAE
+   Type: Space Grotesk (display/labels) + IBM Plex Mono (data/readouts)
+========================================================== */
+
+:root{
+
+    --bg-void:#060A12;
+    --bg-panel:#0D1420;
+    --bg-inset:#070B13;
+    --border:#1C2A3F;
+    --border-hover:#2C4568;
+
+    --blue:#4FC3F7;
+    --blue-dim:#2E7DA6;
+    --amber:#FFB74D;
+    --red:#FF5252;
+    --green:#4ADE80;
+    --purple:#B084F0;
+
+    --text:#E8F1FF;
+    --dim:#7C8FAE;
+
+    --font-display:'Space Grotesk', Arial, sans-serif;
+    --font-mono:'IBM Plex Mono', 'Courier New', monospace;
+
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    background:
+        radial-gradient(ellipse at top left, rgba(79,195,247,0.05), transparent 55%),
+        var(--bg-void);
+
+    color:var(--text);
+
+    font-family:var(--font-mono);
+
+    padding:20px;
+
+}
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.header{
+
+    display:grid;
+
+    grid-template-columns:1.4fr 0.9fr 0.9fr 1.5fr;
+
+    gap:24px;
+
+    align-items:center;
+
+    background:var(--bg-panel);
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+    padding:18px 24px;
+
+    margin-bottom:20px;
+
+}
+
+.logo-section h1{
+
+    font-family:var(--font-display);
+
+    color:var(--text);
+
+    font-size:22px;
+
+    font-weight:700;
+
+    letter-spacing:0.2px;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+}
+
+.logo-mark{
+    color:var(--blue);
+    font-size:20px;
+}
+
+.sub-label{
+
+    font-family:var(--font-mono);
+
+    font-size:10px;
+
+    letter-spacing:2px;
+
+    color:var(--dim);
+
+    margin-top:4px;
+
+    padding-left:30px;
+
+}
+
+.field-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin:6px 0;
+
+    gap:14px;
+
+}
+
+.field-label{
+
+    font-family:var(--font-display);
+
+    font-size:11px;
+
+    letter-spacing:1px;
+
+    color:var(--dim);
+
+    text-transform:uppercase;
+
+}
+
+.field-value{
+
+    font-family:var(--font-mono);
+
+    font-weight:600;
+
+    font-size:14px;
+
+    color:var(--text);
+
+}
+
+.mono-lg{
+    font-size:18px;
+    color:var(--blue);
+    letter-spacing:1px;
+}
+
+.status-pill{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+.led{
+
+    width:9px;
+
+    height:9px;
+
+    border-radius:50%;
+
+    background:var(--red);
+
+    box-shadow:0 0 8px var(--red);
+
+    flex-shrink:0;
+
+}
+
+.led.on{
+    background:var(--green);
+    box-shadow:0 0 8px var(--green);
+}
+
+/* Connection LED states: disconnected (static red) / searching (amber blink) / connected (green pulse) */
+
+.led.disconnected{
+    background:var(--red);
+    box-shadow:0 0 8px var(--red);
+}
+
+.led.searching{
+    background:var(--amber);
+    box-shadow:0 0 8px var(--amber);
+    animation:led-blink 0.8s steps(1,end) infinite;
+}
+
+.led.connected{
+    background:var(--green);
+    animation:led-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes led-blink{
+    50%{ opacity:0.2; }
+}
+
+@keyframes led-pulse{
+    0%,100%{ box-shadow:0 0 8px var(--green); opacity:1; }
+    50%{ box-shadow:0 0 18px var(--green); opacity:0.8; }
+}
+
+button{
+    cursor:pointer;
+    font-family:var(--font-display);
+}
+
+/* ==========================================================
+   TOP CONTROL BAR (header control-section)
+========================================================== */
+
+.control-section{
+
+    display:flex;
+
+    gap:14px;
+
+}
+
+.ctrl-group{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+
+    flex:1;
+
+}
+
+.ctrl-group-label{
+
+    font-family:var(--font-display);
+
+    font-size:9px;
+
+    font-weight:600;
+
+    letter-spacing:1.5px;
+
+    text-transform:uppercase;
+
+    color:var(--dim);
+
+}
+
+.ctrl-row{
+
+    display:flex;
+
+    gap:6px;
+
+}
+
+.hdr-btn{
+
+    flex:1;
+
+    padding:8px 6px;
+
+    border-radius:6px;
+
+    border:1px solid var(--border);
+
+    background:var(--bg-inset);
+
+    color:var(--text);
+
+    font-size:11.5px;
+
+    font-weight:600;
+
+    letter-spacing:0.2px;
+
+    white-space:nowrap;
+
+    transition:0.2s;
+
+}
+
+.hdr-btn:hover{ transform:translateY(-1px); }
+.hdr-btn:active{ transform:translateY(0); }
+
+.hdr-btn--go{ border-color:var(--blue-dim); }
+.hdr-btn--go:hover{ border-color:var(--green); color:var(--green); box-shadow:0 0 10px rgba(74,222,128,0.15); }
+
+.hdr-btn--stop:hover{ border-color:var(--red); color:var(--red); box-shadow:0 0 10px rgba(255,82,82,0.15); }
+
+.hdr-btn--export:hover{ border-color:var(--blue); color:var(--blue); box-shadow:0 0 10px rgba(79,195,247,0.15); }
+
+.hdr-btn--sync:hover{ border-color:var(--purple); color:var(--purple); box-shadow:0 0 10px rgba(176,132,240,0.15); }
+
+.hdr-btn--reset:hover{ border-color:var(--amber); color:var(--amber); box-shadow:0 0 10px rgba(255,183,77,0.15); }
+
+/* ==========================================================
+   ALERT / WARNING BANNER
+========================================================== */
+
+.alert-banner{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:12px 20px;
+
+    border-radius:10px;
+
+    margin-bottom:20px;
+
+    font-family:var(--font-display);
+
+    font-size:13px;
+
+    font-weight:700;
+
+    letter-spacing:0.4px;
+
+    animation:banner-blink 1.4s ease-in-out infinite;
+
+}
+
+.alert-icon{ font-size:15px; }
+
+.alert-banner.warning{
+
+    background:rgba(255,183,77,0.12);
+
+    border:1px solid var(--amber);
+
+    color:var(--amber);
+
+}
+
+.alert-banner.critical{
+
+    background:rgba(255,82,82,0.14);
+
+    border:1px solid var(--red);
+
+    color:var(--red);
+
+    animation-duration:0.9s;
+
+}
+
+@keyframes banner-blink{
+    0%,100%{ opacity:1; }
+    50%{ opacity:0.55; }
+}
+
+/* ==========================================================
+   DYNAMIC TELEMETRY VALUE COLORS
+   Applied via JS to individual readout spans based on thresholds
+========================================================== */
+
+.val-green{ color:var(--green) !important; }
+.val-amber{ color:var(--amber) !important; }
+.val-red{ color:var(--red) !important; }
+.val-blue{ color:var(--blue) !important; }
+
+/* ==========================================================
+   DASHBOARD GRID
+========================================================== */
+
+.dashboard{
+
+    display:grid;
+
+    grid-template-columns:repeat(4, 1fr);
+
+    grid-template-rows:auto auto auto auto;
+
+    grid-template-areas:
+        "mstate telemetry payload horizon"
+        "graphs graphs camera camera"
+        "map map commands console"
+        "map map commands console";
+
+    align-items:start;
+
+    gap:20px;
+
+}
+
+.mission-state{ grid-area:mstate; }
+.telemetry{ grid-area:telemetry; }
+.telemetry.payload{ grid-area:payload; }
+.horizon{ grid-area:horizon; }
+
+.graphs{ grid-area:graphs; }
+.camera{ grid-area:camera; }
+
+.map{ grid-area:map; }
+.commands{ grid-area:commands; }
+.console{ grid-area:console; }
+
+@media (max-width:1200px){
+
+    .dashboard{
+
+        grid-template-columns:repeat(2, 1fr);
+
+        grid-template-areas:
+            "mstate telemetry"
+            "payload horizon"
+            "graphs graphs"
+            "camera camera"
+            "map map"
+            "commands console";
+
+        align-items:start;
+
+    }
+
+}
+
+@media (max-width:720px){
+
+    .header{ grid-template-columns:1fr; }
+
+    .control-section{ flex-direction:column; }
+
+    .dashboard{
+
+        display:flex;
+
+        flex-direction:column;
+
+    }
+
+}
+
+/* ==========================================================
+   PANELS
+========================================================== */
+
+.panel{
+
+    background:var(--bg-panel);
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+    min-height:260px;
+
+    padding:18px;
+
+    transition:0.25s;
+
+}
+
+.panel:hover{
+
+    border-color:var(--border-hover);
+
+}
+
+.panel-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:16px;
+
+    border-bottom:1px solid var(--border);
+
+    padding-bottom:10px;
+
+}
+
+.panel-header h2{
+
+    font-family:var(--font-display);
+
+    color:var(--text);
+
+    font-size:15px;
+
+    font-weight:600;
+
+    letter-spacing:0.3px;
+
+}
+
+/* ==========================================================
+   STATUS LED (panel dots) — driven by error.js per-panel health
+========================================================== */
+
+.status-dot{
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+    background:var(--green);
+
+    box-shadow:0 0 10px var(--green);
+
+    flex-shrink:0;
+
+    transition:0.2s;
+
+}
+
+.status-dot.warn{ background:var(--amber); box-shadow:0 0 10px var(--amber); }
+.status-dot.crit{ background:var(--red); box-shadow:0 0 10px var(--red); animation:led-blink 0.8s steps(1,end) infinite; }
+
+/* ==========================================================
+   MISSION STATE PHASE LADDER
+========================================================== */
+
+.phase-ladder{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:0;
+
+    margin-bottom:16px;
+
+    border-left:2px solid var(--border);
+
+    padding-left:14px;
+
+}
+
+.phase-step{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:8px 0;
+
+    position:relative;
+
+    opacity:0.4;
+
+    transition:0.25s;
+
+}
+
+.phase-step::before{
+
+    content:'';
+
+    position:absolute;
+
+    left:-19px;
+
+    width:8px;
+
+    height:8px;
+
+    border-radius:50%;
+
+    background:var(--dim);
+
+}
+
+.phase-step.done{ opacity:0.65; }
+.phase-step.done::before{ background:var(--blue-dim); }
+
+.phase-step.active{
+
+    opacity:1;
+
+}
+
+.phase-step.active::before{
+
+    background:var(--blue);
+
+    box-shadow:0 0 8px var(--blue);
+
+}
+
+.phase-num{
+
+    font-family:var(--font-mono);
+
+    font-size:11px;
+
+    color:var(--dim);
+
+}
+
+.phase-name{
+
+    font-family:var(--font-display);
+
+    font-size:14px;
+
+    font-weight:600;
+
+}
+
+.phase-step.active .phase-name{ color:var(--blue); }
+
+/* ==========================================================
+   ERROR CODE BLOCK (4-digit mission fault code)
+========================================================== */
+
+.error-code-block{
+
+    margin-top:14px;
+
+    padding:12px;
+
+    background:var(--bg-inset);
+
+    border-radius:6px;
+
+    border:1px dashed var(--border);
+
+}
+
+.error-code-label{
+
+    display:block;
+
+    font-family:var(--font-display);
+
+    font-size:11px;
+
+    letter-spacing:1px;
+
+    color:var(--dim);
+
+    text-transform:uppercase;
+
+    margin-bottom:8px;
+
+}
+
+.error-code-digits{
+
+    display:flex;
+
+    gap:8px;
+
+}
+
+.error-digit{
+
+    flex:1;
+
+    text-align:center;
+
+    padding:8px 0;
+
+    border-radius:5px;
+
+    background:rgba(74,222,128,0.08);
+
+    border:1px solid rgba(74,222,128,0.35);
+
+    color:var(--green);
+
+    font-family:var(--font-mono);
+
+    font-size:16px;
+
+    font-weight:700;
+
+    transition:0.2s;
+
+}
+
+.error-digit.fault{
+
+    background:rgba(255,82,82,0.1);
+
+    border-color:var(--red);
+
+    color:var(--red);
+
+    box-shadow:0 0 10px rgba(255,82,82,0.25);
+
+    animation:blinkAlarm 0.8s infinite;
+
+}
+
+/* ==========================================================
+   TELEMETRY CARDS
+========================================================== */
+
+.telemetry-card{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:10px;
+
+    padding:9px 12px;
+
+    background:var(--bg-inset);
+
+    border-radius:6px;
+
+    border-left:3px solid var(--blue-dim);
+
+}
+
+.telemetry-card span:first-child{
+
+    font-family:var(--font-display);
+
+    font-size:12px;
+
+    color:var(--dim);
+
+    letter-spacing:0.3px;
+
+}
+
+.telemetry-card span:last-child{
+
+    color:var(--blue);
+
+    font-weight:600;
+
+    font-size:14px;
+
+}
+
+.payload .telemetry-card{ border-left-color:var(--purple); }
+.payload .telemetry-card span:last-child{ color:#C9A6FF; }
+
+/* ==========================================================
+   MISSION COMMAND PANEL (critical commands)
+========================================================== */
+
+.commands-warning{
+
+    font-family:var(--font-display);
+
+    font-size:11px;
+
+    letter-spacing:0.3px;
+
+    color:var(--amber);
+
+    background:rgba(255,183,77,0.08);
+
+    border:1px solid rgba(255,183,77,0.3);
+
+    border-radius:6px;
+
+    padding:8px 10px;
+
+    margin-bottom:14px;
+
+}
+
+.cmd-btn{
+
+    width:100%;
+
+    padding:13px;
+
+    margin-bottom:10px;
+
+    border-radius:8px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    letter-spacing:0.3px;
+
+    background:var(--bg-inset);
+
+    color:var(--text);
+
+    border:1px solid var(--border);
+
+    transition:0.2s;
+
+}
+
+.cmd-btn--caution{
+
+    border-color:rgba(255,183,77,0.4);
+
+}
+
+.cmd-btn--caution:hover{
+
+    border-color:var(--amber);
+
+    color:var(--amber);
+
+    box-shadow:0 0 12px rgba(255,183,77,0.2);
+
+    transform:translateY(-1px);
+
+}
+
+.cmd-btn--critical{
+
+    border-color:rgba(255,82,82,0.5);
+
+    color:var(--red);
+
+    background:rgba(255,82,82,0.06);
+
+}
+
+.cmd-btn--critical:hover{
+
+    border-color:var(--red);
+
+    background:rgba(255,82,82,0.14);
+
+    box-shadow:0 0 14px rgba(255,82,82,0.3);
+
+    transform:translateY(-1px);
+
+}
+
+.cmd-btn:active{ transform:translateY(0); }
+
+.command-feedback{
+
+    margin-top:14px;
+
+    padding-top:14px;
+
+    border-top:1px solid var(--border);
+
+}
+
+/* ==========================================================
+   CONTROL BUTTONS (generic / camera)
+========================================================== */
+
+.control-btn{
+
+    width:100%;
+
+    padding:12px;
+
+    margin-bottom:10px;
+
+    background:var(--bg-inset);
+
+    color:var(--text);
+
+    border:1px solid var(--border);
+
+    border-radius:8px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    letter-spacing:0.2px;
+
+    transition:0.2s;
+
+}
+
+.control-btn:hover{
+
+    border-color:var(--blue);
+
+    color:var(--blue);
+
+}
+
+.control-btn:last-child{ margin-bottom:0; }
+
+.control-btn--sm{
+
+    padding:8px;
+
+    font-size:12px;
+
+    margin-bottom:0;
+
+}
+
+/* ==========================================================
+   GRAPH TABS
+========================================================== */
+
+.graph-tabs{
+
+    display:flex;
+
+    gap:6px;
+
+    flex-wrap:wrap;
+
+}
+
+.graph-tab{
+
+    font-family:var(--font-display);
+
+    font-size:11px;
+
+    font-weight:600;
+
+    letter-spacing:0.3px;
+
+    padding:6px 12px;
+
+    border-radius:20px;
+
+    border:1px solid var(--border);
+
+    background:transparent;
+
+    color:var(--dim);
+
+    transition:0.2s;
+
+}
+
+.graph-tab.active{
+
+    background:rgba(79,195,247,0.12);
+
+    border-color:var(--blue);
+
+    color:var(--blue);
+
+}
+
+.graph-slot{ width:100%; }
+
+canvas{
+    width:100% !important;
+}
+
+#altitudeChart, #temperatureChart, #pressureChart, #descentChart, #batteryChart{
+    height:250px !important;
+}
+
+/* ==========================================================
+   ARTIFICIAL HORIZON
+========================================================== */
+
+.orientation-3d-stage{
+
+    width:100%;
+
+    height:280px;
+
+    border-radius:10px;
+
+    border:1px solid var(--border);
+
+    background:var(--bg-inset);
+
+    margin-bottom:16px;
+
+    overflow:hidden;
+
+    position:relative;
+
+    cursor:grab;
+
+}
+
+.orientation-3d-stage canvas{
+
+    display:block;
+
+    width:100% !important;
+
+    height:100% !important;
+
+}
+
+.orientation-nosignal{
+
+    position:absolute;
+
+    left:50%;
+
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+    font-family:var(--font-display);
+
+    font-size:13px;
+
+    letter-spacing:3px;
+
+    color:rgba(232,241,255,0.7);
+
+    background:rgba(6,10,18,0.55);
+
+    padding:6px 14px;
+
+    border-radius:4px;
+
+    z-index:2;
+
+    pointer-events:none;
+
+    display:none;
+
+}
+
+.orientation-nosignal.show{
+
+    display:block;
+
+}
+
+.attitude-readout{
+
+    display:grid;
+
+    grid-template-columns:repeat(3, 1fr);
+
+    gap:8px;
+
+}
+
+.attitude-readout .telemetry-card{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:4px;
+
+}
+
+/* ==========================================================
+   CAMERA FEED
+========================================================== */
+
+.rec-indicator{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    font-family:var(--font-display);
+
+    font-size:11px;
+
+    letter-spacing:1px;
+
+    color:var(--red);
+
+}
+
+.rec-dot{
+
+    width:8px;
+
+    height:8px;
+
+    border-radius:50%;
+
+    background:var(--red);
+
+    box-shadow:0 0 8px var(--red);
+
+    animation:blink 1.4s infinite;
+
+}
+
+@keyframes blink{
+
+    0%,55%{ opacity:1; }
+
+    56%,100%{ opacity:0.15; }
+
+}
+
+.camera-viewport{
+
+    position:relative;
+
+    border-radius:8px;
+
+    overflow:hidden;
+
+    border:1px solid var(--border);
+
+    background:#000;
+
+    margin-bottom:12px;
+
+}
+
+#cameraCanvas{
+
+    width:100%;
+
+    height:auto !important;
+
+    display:block;
+
+    filter:brightness(0.85) contrast(1.05);
+
+}
+
+.camera-overlay{
+
+    position:absolute;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:10px 14px;
+
+    pointer-events:none;
+
+}
+
+.camera-tag{
+
+    font-family:var(--font-mono);
+
+    font-size:11px;
+
+    color:var(--green);
+
+    background:rgba(6,10,18,0.55);
+
+    padding:3px 8px;
+
+    border-radius:4px;
+
+    letter-spacing:0.5px;
+
+}
+
+.camera-tag--right{ color:var(--amber); }
+
+.camera-nosignal{
+
+    position:absolute;
+
+    left:50%;
+
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+    font-family:var(--font-display);
+
+    font-size:13px;
+
+    letter-spacing:3px;
+
+    color:rgba(232,241,255,0.7);
+
+    background:rgba(6,10,18,0.5);
+
+    padding:6px 14px;
+
+    border-radius:4px;
+
+}
+
+.camera-controls{
+
+    display:grid;
+
+    grid-template-columns:1.4fr 1fr 1fr;
+
+    gap:8px;
+
+}
+
+.camera-telemetry{
+
+    display:grid;
+
+    grid-template-columns:repeat(2, 1fr);
+
+    gap:8px;
+
+    margin-top:10px;
+
+}
+
+.camera-telemetry .telemetry-card{
+
+    margin-bottom:0;
+
+}
+
+.camera-select{
+
+    background:var(--bg-inset);
+
+    color:var(--text);
+
+    border:1px solid var(--border);
+
+    border-radius:8px;
+
+    padding:8px 10px;
+
+    font-family:var(--font-mono);
+
+    font-size:12px;
+
+}
+
+/* ==========================================================
+   GPS MAP
+========================================================== */
+
+#map{
+
+    width:100%;
+
+    height:220px;
+
+    border-radius:8px;
+
+    overflow:hidden;
+
+    margin-bottom:14px;
+
+    filter:saturate(0.85) brightness(0.92);
+
+}
+
+.gps-readout{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:10px;
+
+}
+
+/* ==========================================================
+   CONSOLE
+========================================================== */
+
+#console-log{
+
+    height:220px;
+
+    overflow-y:auto;
+
+    font-family:var(--font-mono);
+
+    font-size:12px;
+
+    color:var(--dim);
+
+    background:var(--bg-inset);
+
+    border-radius:6px;
+
+    padding:10px 12px;
+
+}
+
+#console-log p{
+
+    padding:2px 0;
+
+    border-bottom:1px dashed rgba(28,42,63,0.6);
+
+}
+
+#console-log p:last-child{ border-bottom:none; }
+
+#console-log p{
+
+    display:flex;
+
+    gap:8px;
+
+    align-items:baseline;
+
+}
+
+#console-log .log-time{
+
+    color:var(--dim);
+
+    font-size:11px;
+
+    flex-shrink:0;
+
+}
+
+#console-log .log-success{ color:var(--green); }
+#console-log .log-info{ color:var(--blue); }
+#console-log .log-warning{ color:var(--amber); }
+#console-log .log-critical{ color:var(--red); font-weight:600; }
+
+#console-log::-webkit-scrollbar{ width:6px; }
+#console-log::-webkit-scrollbar-thumb{ background:var(--border-hover); border-radius:4px; }
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+.footer{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:16px;
+
+    margin-top:20px;
+
+    padding:14px 24px;
+
+    background:var(--bg-panel);
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+    font-family:var(--font-mono);
+
+    font-size:12px;
+
+}
+
+.footer div{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+}
+
+.footer strong{
+
+    font-family:var(--font-display);
+
+    color:var(--dim);
+
+    font-weight:600;
+
+    font-size:11px;
+
+    letter-spacing:0.3px;
+
+    text-transform:uppercase;
+
+}
+
+.footer span{
+
+    color:var(--text);
+
+    font-weight:600;
+
+}
+
+#com-port{ color:var(--red); }
+#com-port.connected{ color:var(--green); }
+#signal-strength{ color:var(--green); }
+#footer-packets{ color:var(--amber); }
+
+@media (max-width:768px){
+
+    .footer{ flex-direction:column; align-items:flex-start; }
+
+    .camera-controls{ grid-template-columns:1fr; }
+
+}
+
+/* =====================================================
+   BLINKING FAULT INDICATOR (used on the 4-digit error code
+   and on critical status dots)
+===================================================== */
+
+@keyframes blinkAlarm{
+
+    0%,100%{
+        opacity:1;
+    }
+
+    50%{
+        opacity:.4;
+    }
+
+}
+
+/* =====================================================
+   FLASH ON VALUE CHANGE (optional utility)
+===================================================== */
+
+@keyframes valueFlash{
+
+    0%{
+        background:#4FC3F7;
+        color:white;
+    }
+
+    100%{
+        background:transparent;
+    }
+
+}
+
+.flash{
+
+    animation:valueFlash .4s;
+
+}
+
+.graph-tabs{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+}
+
+.graph-tab{
+    font-family:var(--font-display);
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.3px;
+    padding:6px 12px;
+    border-radius:20px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--dim);
+    transition:0.2s;
+}
+
+.graph-tab:hover{
+    border-color:var(--border-hover);
+    color:var(--text);
+}
+
+.graph-tab.active{
+    background:rgba(79,195,247,0.12);
+    border-color:var(--blue);
+    color:var(--blue);
+}
+
+.graph-slot{ width:100%; }
+
+canvas{ width:100% !important; }
+
+#altitudeChart, #pressureChart, #temperatureChart, #batteryChart, #descentChart{
+    height:250px !important;
+}
