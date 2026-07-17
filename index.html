@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CanSat Ground Control System</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+</head>
+
+<body>
+
+    <!-- ==========================================================
+                           HEADER / TOP CONTROL BAR
+    =========================================================== -->
+
+    <header class="header">
+
+        <div class="logo-section">
+            <h1><span class="logo-mark">◈</span> CanSat Ground Control</h1>
+            <p class="sub-label">TELEMETRY &amp; MISSION OPERATIONS</p>
+        </div>
+
+        <div class="mission-section">
+            <p class="field-row"><span class="field-label">Mission</span><span id="mission-name" class="field-value">Mission Alpha</span></p>
+            <p class="field-row"><span class="field-label">Team</span><span id="team-id" class="field-value">Team 01</span></p>
+        </div>
+
+        <div class="status-section">
+            <p class="field-row">
+                <span class="field-label">Link</span>
+                <span class="field-value status-pill" id="connection-status-pill">
+                    <span class="led" id="connection-led"></span>
+                    <span id="connection-status">Disconnected</span>
+                </span>
+            </p>
+            <p class="field-row"><span class="field-label">MET</span><span id="header-mission-time" class="field-value mono-lg">00:00:00</span></p>
+        </div>
+
+        <!-- Top Control Bar: telemetry streaming + data management -->
+        <div class="control-section">
+
+            <div class="ctrl-group">
+                <span class="ctrl-group-label">Telemetry</span>
+                <div class="ctrl-row">
+                    <button id="start-btn" class="hdr-btn hdr-btn--go" title="Start telemetry streaming">▶ Start</button>
+                    <button id="stop-btn" class="hdr-btn hdr-btn--stop" title="Stop telemetry streaming">■ Stop</button>
+                </div>
+            </div>
+
+            <div class="ctrl-group">
+                <span class="ctrl-group-label">Data</span>
+                <div class="ctrl-row">
+                    <button id="export-csv-btn" class="hdr-btn hdr-btn--export" title="Export telemetry log as CSV">⤓ CSV</button>
+                    <button id="export-graph-btn" class="hdr-btn hdr-btn--export" title="Export current graph as image">⤓ Graph</button>
+                </div>
+            </div>
+
+            <div class="ctrl-group">
+                <span class="ctrl-group-label">System</span>
+                <div class="ctrl-row">
+                    <button id="sync-time-btn" class="hdr-btn hdr-btn--sync" title="Sync ground station clock to PC time">⏱ Sync Time</button>
+                    <button id="reset-packet-btn" class="hdr-btn hdr-btn--reset" title="Reset packet counter">🔄 Reset Pkt</button>
+                </div>
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- ==========================================================
+                        ALERT / WARNING BANNER
+    =========================================================== -->
+
+    <div id="alert-banner" class="alert-banner" hidden>
+        <span class="alert-icon" id="alert-icon">⚠</span>
+        <span class="alert-text" id="alert-text">All systems nominal</span>
+    </div>
+
+    <!-- ==========================================================
+                           DASHBOARD
+    =========================================================== -->
+
+    <main class="dashboard">
+
+        <!-- ======================================================
+                        MISSION STATE PANEL
+        ======================================================= -->
+
+        <section class="panel mission-state">
+
+            <div class="panel-header">
+                <h2>◎ Mission State</h2>
+                <span class="status-dot" id="phase-dot"></span>
+            </div>
+
+            <div class="phase-ladder" id="phase-ladder">
+                <div class="phase-step" data-phase="PRELAUNCH"><span class="phase-num">01</span><span class="phase-name">Prelaunch</span></div>
+                <div class="phase-step" data-phase="ASCENT"><span class="phase-num">02</span><span class="phase-name">Ascent</span></div>
+                <div class="phase-step" data-phase="APOGEE"><span class="phase-num">03</span><span class="phase-name">Apogee</span></div>
+                <div class="phase-step" data-phase="DESCENT"><span class="phase-num">04</span><span class="phase-name">Descent</span></div>
+                <div class="phase-step" data-phase="LANDED"><span class="phase-num">05</span><span class="phase-name">Landed</span></div>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Mode</span>
+                <span id="mode">Flight</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>State</span>
+                <span id="state">Prelaunch</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Time in State</span>
+                <span id="state-time">00:00:00</span>
+            </div>
+
+            <!-- 4-digit mission error code (single source of truth — owned by error.js) -->
+            <div class="error-code-block">
+                <span class="error-code-label">Error Code</span>
+                <div class="error-code-digits" id="error-code-digits">
+                    <span class="error-digit" data-cond="Descent Rate" id="err-digit-1">0</span>
+                    <span class="error-digit" data-cond="GPS Availability" id="err-digit-2">0</span>
+                    <span class="error-digit" data-cond="Payload Separation" id="err-digit-3">0</span>
+                    <span class="error-digit" data-cond="Emergency Parachute" id="err-digit-4">0</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ======================================================
+                      CONTAINER TELEMETRY
+        ======================================================= -->
+
+        <section class="panel telemetry">
+
+            <div class="panel-header">
+                <h2>📡 Container Telemetry</h2>
+                <span class="status-dot" id="container-dot"></span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Mission Time</span>
+                <span id="telemetry-mission-time">00:00:00</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Packet Count</span>
+                <span id="packet-count">000000</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Packet Rate</span>
+                <span id="packet-rate">0 Hz</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Altitude</span>
+                <span id="altitude">0.0 m</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Pressure</span>
+                <span id="pressure">1013.0 hPa</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Temperature</span>
+                <span id="temperature">25.0 °C</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Battery</span>
+                <span id="battery">7.40 V</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>GPS</span>
+                <span id="gps">Waiting...</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>GPS Fix</span>
+                <span id="gps-fix">No Fix</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Satellites</span>
+                <span id="sats">0</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>HDOP</span>
+                <span id="hdop">--</span>
+            </div>
+
+        </section>
+
+        <!-- ======================================================
+                        PAYLOAD TELEMETRY
+        ======================================================= -->
+
+        <section class="panel telemetry payload">
+
+            <div class="panel-header">
+                <h2>🧪 Payload Telemetry</h2>
+                <span class="status-dot" id="payload-dot"></span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Packet Count</span>
+                <span id="payload-packet-count">000000</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Altitude</span>
+                <span id="payload-altitude">0.0 m</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Pressure</span>
+                <span id="payload-pressure">1013.0 hPa</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Temperature</span>
+                <span id="payload-temperature">25.0 °C</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Battery</span>
+                <span id="payload-battery">3.70 V</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Descent Rate</span>
+                <span id="descent-rate">0.0 m/s</span>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Release Status</span>
+                <span id="release-status">Attached</span>
+            </div>
+
+        </section>
+
+        <!-- ======================================================
+                           LIVE GRAPHS
+             Graph toolbar + 5 canvases wired to js/charts.js
+             (initializeCharts / createChart / pushTelemetryPoint /
+             updateGraphs / switchGraph). Do not add extra canvases
+             here without also adding a matching entry in the
+             SERIES map inside charts.js.
+        ======================================================= -->
+
+        <section class="panel graphs">
+
+            <div class="panel-header">
+                <h2>📈 Live Telemetry Graphs</h2>
+                <div class="graph-tabs" id="graph-tabs">
+                    <button class="graph-tab active" data-graph="altitude">Altitude</button>
+                    <button class="graph-tab" data-graph="pressure">Pressure</button>
+                    <button class="graph-tab" data-graph="temperature">Temperature</button>
+                    <button class="graph-tab" data-graph="battery">Battery</button>
+                    <button class="graph-tab" data-graph="descent">Descent Rate</button>
+                </div>
+            </div>
+
+            <div class="graph-slot"><canvas id="altitudeChart"></canvas></div>
+            <div class="graph-slot" hidden><canvas id="pressureChart"></canvas></div>
+            <div class="graph-slot" hidden><canvas id="temperatureChart"></canvas></div>
+            <div class="graph-slot" hidden><canvas id="batteryChart"></canvas></div>
+            <div class="graph-slot" hidden><canvas id="descentChart"></canvas></div>
+
+        </section>
+
+        <!-- ======================================================
+                        ARTIFICIAL HORIZON
+        ======================================================= -->
+
+        <section class="panel horizon">
+
+            <div class="panel-header">
+                <h2>🛰 Attitude &amp; Orientation</h2>
+                <span class="status-dot" id="orientation-dot"></span>
+            </div>
+
+            <div class="orientation-3d-stage" id="orientation3d" title="Drag to orbit the view">
+                <div class="orientation-nosignal" id="orientation-nosignal">NO TELEMETRY</div>
+            </div>
+
+            <div class="attitude-readout">
+                <div class="telemetry-card"><span>Roll</span><span id="roll">0.0°</span></div>
+                <div class="telemetry-card"><span>Pitch</span><span id="pitch">0.0°</span></div>
+                <div class="telemetry-card"><span>Yaw</span><span id="yaw">000°</span></div>
+            </div>
+
+            <div class="telemetry-card">
+                <span>Heading</span>
+                <span id="heading">North</span>
+            </div>
+
+        </section>
+
+        <!-- ======================================================
+                           CAMERA FEED
+        ======================================================= -->
+
+        <section class="panel camera">
+
+            <div class="panel-header">
+                <h2>📷 Payload Camera</h2>
+                <span class="rec-indicator" id="rec-indicator"><span class="rec-dot"></span>REC</span>
+            </div>
+
+            <div class="camera-viewport">
+                <canvas id="cameraCanvas" width="480" height="270"></canvas>
+                <div class="camera-overlay">
+                    <span class="camera-tag">CAM-01 · PAYLOAD</span>
+                    <span class="camera-tag camera-tag--right" id="camera-timestamp">00:00:00</span>
+                    <span class="camera-nosignal">NO SIGNAL</span>
+                </div>
+            </div>
+
+            <div class="camera-controls">
+                <select id="camera-select" class="camera-select">
+                    <option value="">Select camera…</option>
+                </select>
+                <button id="camera-start-btn" class="control-btn control-btn--sm">▶ Start Stream</button>
+                <button id="camera-stop-btn" class="control-btn control-btn--sm">■ Stop Stream</button>
+            </div>
+
+            <div class="camera-telemetry">
+                <div class="telemetry-card"><span>Camera</span><span id="camera-name">--</span></div>
+                <div class="telemetry-card"><span>FPS</span><span id="camera-fps">--</span></div>
+                <div class="telemetry-card"><span>Resolution</span><span id="camera-resolution">--</span></div>
+                <div class="telemetry-card"><span>Latency</span><span id="camera-latency">-- ms</span></div>
+                <div class="telemetry-card"><span>Status</span><span id="camera-status">NO SIGNAL</span></div>
+            </div>
+
+        </section>
+
+        <!-- ======================================================
+                             GPS MAP
+        ======================================================= -->
+
+        <section class="panel map">
+
+            <div class="panel-header">
+                <h2>🗺 GPS Tracking</h2>
+                <span class="status-dot" id="gps-dot"></span>
+            </div>
+
+            <div id="map"></div>
+
+            <div class="gps-readout">
+                <div class="telemetry-card"><span>Latitude</span><span id="latitude">20.148600</span></div>
+                <div class="telemetry-card"><span>Longitude</span><span id="longitude">85.671000</span></div>
+            </div>
+
+        </section>
+
+        <!-- ======================================================
+                    MISSION COMMAND PANEL (critical commands)
+        ======================================================= -->
+
+        <section class="panel commands">
+
+            <div class="panel-header">
+                <h2>🎮 Mission Command Panel</h2>
+                <span class="status-dot" id="commands-dot"></span>
+            </div>
+
+            <p class="commands-warning">⚠ Critical commands — actions are irreversible in flight</p>
+
+            <button id="manual-btn" class="cmd-btn cmd-btn--caution" title="Manually trigger payload separation">
+                📦 Manual Separation
+            </button>
+
+            <button id="parachute-btn" class="cmd-btn cmd-btn--critical" title="Force-deploy the emergency parachute">
+                🪂 Emergency Parachute
+            </button>
+
+            <button id="redundant-btn" class="cmd-btn cmd-btn--caution" title="Fire the redundant activation circuit">
+                🔁 Redundant Activation
+            </button>
+
+            <div class="command-feedback">
+                <div class="telemetry-card">
+                    <span>Last Command</span>
+                    <span id="last-command">None</span>
+                </div>
+                <div class="telemetry-card">
+                    <span>Status</span>
+                    <span id="command-status">Idle</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ======================================================
+                           CONSOLE
+        ======================================================= -->
+
+        <section class="panel console">
+
+            <div class="panel-header">
+                <h2>💻 Mission Console</h2>
+            </div>
+
+            <div id="console-log">
+                <p>✔ System Initialized</p>
+                <p>✔ Waiting for telemetry...</p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ==========================================================
+                        FOOTER STATUS BAR
+    =========================================================== -->
+
+    <footer class="footer">
+
+        <div><strong>COM Port:</strong><span id="com-port">Not Connected</span></div>
+        <div><strong>Baud Rate:</strong><span id="baud-rate">9600 baud</span></div>
+        <div><strong>Signal:</strong><span id="signal-strength">-- %</span></div>
+        <div><strong>Status:</strong><span id="footer-connection-status">Disconnected</span></div>
+        <div><strong>Packets:</strong><span id="footer-packets">000000</span></div>
+        <div><strong>Ground Station Time:</strong><span id="ground-time">--:--:--</span></div>
+        <div><strong>Software:</strong><span>v2.2</span></div>
+
+    </footer>
+
+    <!-- ==========================================================
+                        JAVASCRIPT LIBRARIES
+    =========================================================== -->
+
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+
+    <!-- Project JavaScript -->
+    <script src="js/telemetry.js"></script>
+    <script src="js/error.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/orientation.js"></script>
+    <script src="js/video.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>
